@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/chartLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="8dp"
+    tools:context=".ui.chart.ChartFragment">
+
+    <!--
+    <TextView
+        android:id="@+id/label_weightFuel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:labelFor="@+id/editText_weightFuel"
+        android:text="@string/label_weightFuel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/editText_weightFuel"
+        android:text="240"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="44dp"
+        android:ems="10"
+        android:importantForAutofill="no"
+        android:inputType="number"
+        app:layout_constraintBaseline_toBaselineOf="@+id/label_weightFuel"
+        app:layout_constraintStart_toEndOf="@+id/label_weightFuel" />
+
+    <TextView
+        android:id="@+id/label_weightFront"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:labelFor="@+id/editText_weightFront"
+        android:text="@string/label_weightFront"
+        app:layout_constraintBaseline_toBaselineOf="@id/editText_weightFront"
+        app:layout_constraintStart_toStartOf="@id/label_weightFuel" />
+
+    <EditText
+        android:id="@+id/editText_weightFront"
+        android:text="360"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:importantForAutofill="no"
+        android:inputType="number"
+        app:layout_constraintStart_toStartOf="@+id/editText_weightFuel"
+        app:layout_constraintTop_toBottomOf="@+id/editText_weightFuel" />
+
+    <TextView
+        android:id="@+id/label_weightRear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:labelFor="@+id/editText_weightRear"
+        android:text="@string/label_weightRear"
+        app:layout_constraintBaseline_toBaselineOf="@+id/editText_weightRear"
+        app:layout_constraintStart_toStartOf="@+id/label_weightFront" />
+
+    <EditText
+        android:id="@+id/editText_weightRear"
+        android:text="150"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:importantForAutofill="no"
+        android:inputType="number"
+        app:layout_constraintStart_toStartOf="@+id/editText_weightFront"
+        app:layout_constraintTop_toBottomOf="@+id/editText_weightFront" />
+
+    <TextView
+        android:id="@+id/label_weightBag1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:labelFor="@+id/editText_weightBag1"
+        android:text="@string/label_weightBag1"
+        app:layout_constraintBaseline_toBaselineOf="@+id/editText_weightBag1"
+        app:layout_constraintStart_toStartOf="@+id/label_weightFront" />
+
+    <EditText
+        android:id="@+id/editText_weightBag1"
+        android:text="25"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:importantForAutofill="no"
+        android:inputType="number"
+        app:layout_constraintStart_toStartOf="@+id/editText_weightFront"
+        app:layout_constraintTop_toBottomOf="@+id/editText_weightRear" />
+
+    <TextView
+        android:id="@+id/label_weightBag2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:labelFor="@+id/editText_weightBag2"
+        android:text="@string/label_weightBag2"
+        app:layout_constraintBaseline_toBaselineOf="@+id/editText_weightBag2"
+        app:layout_constraintStart_toStartOf="@+id/label_weightFront" />
+
+    <EditText
+        android:id="@+id/editText_weightBag2"
+        android:text="10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:importantForAutofill="no"
+        android:inputType="number"
+        app:layout_constraintStart_toStartOf="@+id/editText_weightFront"
+        app:layout_constraintTop_toBottomOf="@+id/editText_weightBag1" />
+    -->
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/imageView_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="imageView_chart"/>
+
+    <ImageView
+        android:id="@+id/imageView_chart"
+        android:layout_width="0sp"
+        android:layout_height="0sp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="@string/weight_and_balance_chart"
+        android:src="@drawable/ic_menu_camera"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imageView_barrier" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

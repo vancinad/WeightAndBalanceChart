@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/work/AndroidStudioProjects/WBChart/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.12291666666666666" />
+        <entry key="..\:/work/AndroidStudioProjects/WBChart/app/src/main/res/drawable/ic__0200429174214_black_aircraft_icon.xml" value="0.1" />
+        <entry key="..\:/work/AndroidStudioProjects/WBChart/app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.1" />
+        <entry key="..\:/work/AndroidStudioProjects/WBChart/app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="..\:/work/AndroidStudioProjects/WBChart/app/src/main/res/layout/fragment_chart.xml" value="0.25658561296859167" />
+        <entry key="..\:/work/AndroidStudioProjects/WBChart/app/src/main/res/layout/fragment_gallery.xml" value="0.33240740740740743" />
+        <entry key="..\:/work/AndroidStudioProjects/WBChart/app/src/main/res/layout/fragment_slideshow.xml" value="0.33240740740740743" />
+        <entry key="..\:/work/AndroidStudioProjects/WBChart/app/src/main/res/layout/nav_header_main.xml" value="0.2867274569402229" />
+        <entry key="..\:/work/AndroidStudioProjects/WBChart/app/src/main/res/menu/activity_main_drawer.xml" value="0.4884353741496599" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
