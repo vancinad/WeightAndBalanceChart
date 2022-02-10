@@ -1,4 +1,4 @@
-package org.vancinad.wbchart.aircraft;
+package org.vancinad.aircraft;
 
 import java.util.ArrayList;
 import java.util.Iterator;

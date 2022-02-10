@@ -9,9 +9,9 @@ import android.graphics.Rect;
 import android.util.Log;
 
 import org.json.JSONObject;
-import org.vancinad.wbchart.aircraft.Aircraft;
-import org.vancinad.wbchart.aircraft.CGEnvelope;
-import org.vancinad.wbchart.aircraft.Vertex;
+import org.vancinad.aircraft.Aircraft;
+import org.vancinad.aircraft.CGEnvelope;
+import org.vancinad.aircraft.Vertex;
 
 import java.util.Iterator;
 

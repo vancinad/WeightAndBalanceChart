@@ -1,0 +1,79 @@
+{
+  "name": "Cessna 172N",
+  "stations": [
+    {
+      "arm": 46,
+      "name": "Fuel"
+    },
+    {
+      "arm": 37,
+      "name": "Front Seats"
+    },
+    {
+      "arm": 73,
+      "name": "Rear Seats"
+    },
+    {
+      "arm": 95,
+      "name": "Baggage 1"
+    },
+    {
+      "arm": 123,
+      "name": "Baggage 2 (middle)"
+    }
+  ],
+  "envelopes": [
+    {
+      "name": "Normal",
+      "color": "cyan",
+      "vertices": [
+        {
+          "cg": 35,
+          "weight": 1500
+        },
+        {
+          "cg": 35,
+          "weight": 1950
+        },
+        {
+          "cg": 38.5,
+          "weight": 2300
+        },
+        {
+          "cg": 47.3,
+          "weight": 2300
+        },
+        {
+          "cg": 47.3,
+          "weight": 1500
+        }
+      ]
+    },
+    {
+      "name": "Utility",
+      "color": "green",
+      "vertices": [
+        {
+          "cg": 35,
+          "weight": 1500
+        },
+        {
+          "cg": 35,
+          "weight": 1950
+        },
+        {
+          "cg": 35.5,
+          "weight": 2000
+        },
+        {
+          "cg": 40.5,
+          "weight": 2000
+        },
+        {
+          "cg": 40.5,
+          "weight": 1500
+        }
+      ]
+    }
+  ]
+}

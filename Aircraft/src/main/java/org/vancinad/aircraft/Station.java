@@ -1,4 +1,4 @@
-package org.vancinad.wbchart.aircraft;
+package org.vancinad.aircraft;
 
 public class Station {
     String name;

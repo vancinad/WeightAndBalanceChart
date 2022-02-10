@@ -1,5 +1,6 @@
-package org.vancinad.wbchart.aircraft;
+package org.vancinad.aircraft;
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -16,13 +17,13 @@ public class Aircraft {
     ArrayList<Double> mStationWeights;
     boolean mIsApproved = false;
 
-    public static Aircraft createNew(String typeString, String tailNumber, Double emptyWeight, Double emptyCG) {
+    public static Aircraft Factory(String typeString, String tailNumber, Double emptyWeight, Double emptyCG, Context applicationContext) {
         AircraftType newAircraftType = null;
         Aircraft newAircraft = null;
 
-        if (typeString.equals("3A12-172N")) newAircraftType = new Cessna172N();
-        // TODO: Need to handle other aircraft types. Anything other than 3A12-172N will throw an NPE
-
+        //if (typeString.equals("3A12-172N.json")) newAircraftType = new Cessna172N();
+        // TODO: Need to handle other aircraft types. Anything other than 3A12-172N.json will throw an NPE
+        newAircraftType = AircraftType.Factory("3A12-172N", applicationContext);
         if (newAircraftType != null)
             if (newAircraftType.isApproved()) {
                 newAircraft = new Aircraft(newAircraftType, tailNumber, emptyWeight, emptyCG);

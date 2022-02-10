@@ -13,13 +13,13 @@
 
     <fragment
         android:id="@+id/nav_gallery"
-        android:name="org.vancinad.wbchart.ui.gallery.GalleryFragment"
+        android:name="org.vancinad.wbchart.ui.aircraft.AircraftFragment"
         android:label="@string/menu_aircraft"
         tools:layout="@layout/fragment_gallery" />
 
     <fragment
         android:id="@+id/nav_slideshow"
-        android:name="org.vancinad.wbchart.ui.slideshow.SlideshowFragment"
+        android:name="org.vancinad.wbchart.ui.types.AircraftFragment"
         android:label="@string/menu_types"
         tools:layout="@layout/fragment_slideshow" />
 </navigation>

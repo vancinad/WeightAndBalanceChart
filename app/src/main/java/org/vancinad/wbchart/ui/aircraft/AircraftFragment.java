@@ -1,4 +1,4 @@
-package org.vancinad.wbchart.ui.gallery;
+package org.vancinad.wbchart.ui.aircraft;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -15,7 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import org.vancinad.wbchart.R;
 
-public class GalleryFragment extends Fragment {
+public class AircraftFragment extends Fragment {
 
     private GalleryViewModel galleryViewModel;
 

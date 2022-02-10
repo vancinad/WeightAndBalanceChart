@@ -1,4 +1,4 @@
-package org.vancinad.wbchart.ui.slideshow;
+package org.vancinad.wbchart.ui.types;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -15,18 +15,19 @@ import androidx.lifecycle.ViewModelProvider;
 
 import org.vancinad.wbchart.R;
 
-public class SlideshowFragment extends Fragment {
+public class AircraftFragment extends Fragment {
+    final String _LOG_TAG = "AircraftFragment";
 
-    private SlideshowViewModel slideshowViewModel;
+    private TypesViewModel typesViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        Log.d("SlideshowFragment", "onCreateView() called");
-        slideshowViewModel =
-                new ViewModelProvider(this).get(SlideshowViewModel.class);
+        Log.d(_LOG_TAG, "onCreateView() called");
+        typesViewModel =
+                new ViewModelProvider(this).get(TypesViewModel.class);
         View root = inflater.inflate(R.layout.fragment_slideshow, container, false);
         final TextView textView = root.findViewById(R.id.text_slideshow);
-        slideshowViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        typesViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);

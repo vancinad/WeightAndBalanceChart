@@ -1,4 +1,5 @@
-package org.vancinad.wbchart.aircraft;
+/*
+package org.vancinad.aircraft;
 
 import android.graphics.Color;
 
@@ -6,6 +7,7 @@ import java.util.ArrayList;
 
 public class Cessna172N extends AircraftType {
     public Cessna172N() {
+
         super("3A12-172N");
     }
 
@@ -61,3 +63,4 @@ public class Cessna172N extends AircraftType {
 
 
 }
+*/

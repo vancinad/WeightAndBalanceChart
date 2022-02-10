@@ -5,12 +5,13 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import org.vancinad.wbchart.aircraft.Aircraft;
+import org.vancinad.aircraft.Aircraft;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
 public class ChartViewModel extends ViewModel {
+
 
     Aircraft mAircraft;
     private ArrayList<MutableLiveData<Double>> weights;
