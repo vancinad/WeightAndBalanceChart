@@ -1,6 +1,5 @@
 package org.vancinad.aircraft;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.util.JsonReader;
 import android.util.Log;
@@ -18,62 +17,17 @@ public class AircraftType {
     String mTypeString = null; // file name from which type data was retrieved (minus ".json")
     String mTypeName = null; // Display name
     private boolean mIsApproved = false;
-//    double grossWeight = 0;
-//    double CG = 0;
 
-    //TODO: Implement AircraftType.Factory(String aircraftType)
-    /*
-        Read "types directory" for all defined types.
-        Find definition corresponding to aircraftType string
-        Eliminate type-specific classes (e.g. Cessna172N extends AircraftType)
-        Make AircraftType concrete instead of abstract
-        Load
-     */
-    static AircraftType Factory(String typeString, Context applicationContext) {
-        AircraftType type = null;
-        File filesDir = applicationContext.getFilesDir();
-        Log.d(_LOG_TAG, String.format("context='%s' basePath='%s'", applicationContext, filesDir));
-        Log.d(_LOG_TAG, String.format("Factory(): filesDir='%s' isDirectory=%b canRead=%b canWrite=%b",filesDir.toString(), filesDir.isDirectory(), filesDir.canRead(), filesDir.canWrite()));
-        File typesFilesDir = new File(filesDir, "types");
-        typesFilesDir.mkdirs();
-        Log.d(_LOG_TAG, String.format("Factory(): typesFilesDir='%s' isDirectory=%b canRead=%b canWrite=%b",typesFilesDir.toString(), typesFilesDir.isDirectory(), typesFilesDir.canRead(), typesFilesDir.canWrite()));
-        typesFilesDir.setWritable(true);
-        Log.d(_LOG_TAG, String.format("Factory(): typesFilesDir='%s' isDirectory=%b canRead=%b canWrite=%b (after .setWritable(true))",typesFilesDir.toString(), typesFilesDir.isDirectory(), typesFilesDir.canRead(), typesFilesDir.canWrite()));
-        //typesFilesDir.mkdirs();
-        File[] typesFiles = typesFilesDir.listFiles();
-        assert typesFiles != null;
-        Log.d(_LOG_TAG, typesFiles.length + " files found");
-        String name = null;
-        int i;
-        for (i=0; i<typesFiles.length; i++) {
-            name = typesFiles[i].getName();
-            if (name.equals(typeString+".json"))
-                break;
-        }
-        if (i < typesFiles.length) {
-            // corresponding type file was found
-            type = new AircraftType(typesFiles[i]);
-            if (!type.isApproved())
-                type = null;
-        }
-
-        return type;
-    }
-
-    //TODO: Make constructor private and implement AircraftTypeFactory.
-    private AircraftType(File typeFile) {
-        this.mTypeString = typeFile.getName();
+    AircraftType(File typeFile) {
         mStations = new ArrayList<>();
         mEnvelopes = new ArrayList<>();
         try {
             FileReader typeReader = new FileReader(typeFile);
             JsonReader jr = new JsonReader(typeReader);
-            readType(jr);
+            readType(jr); // load all instance data from .json file
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        mStations = loadStations(typeFile);
-//        mEnvelopes = loadEnvelopes();
 
         if (mStations != null && mEnvelopes !=null)
             if (mStations.size() > 0 && mEnvelopes.size() > 0)
@@ -86,15 +40,17 @@ public class AircraftType {
             String name = jr.nextName();
             if (name.equals("name"))
                 mTypeName = jr.nextString();
-            else if (name.equals("stations"))
-                setStations(jr);
+            else if (name.equals("typeId")) {
+                mTypeString = jr.nextString();
+            } else if (name.equals("stations"))
+                readStations(jr);
             else if (name.equals("envelopes"))
-                setEnvelopes(jr);
+                readEnvelopes(jr);
         }
         jr.endObject();
     }
 
-    private void setEnvelopes(JsonReader jr) throws IOException {
+    private void readEnvelopes(JsonReader jr) throws IOException {
         CGEnvelope envelope;
 
         jr.beginArray();
@@ -174,7 +130,7 @@ public class AircraftType {
             return null;
     }
 
-    private void setStations(JsonReader jr) throws IOException {
+    private void readStations(JsonReader jr) throws IOException {
         jr.beginArray();
         while (jr.hasNext()) {
             double arm = Double.MIN_VALUE;
@@ -196,19 +152,6 @@ public class AircraftType {
         }
         jr.endArray();
     }
-
-
-/*
-    ArrayList<String> getTypes() {
-        //TODO: Implement this
-        ArrayList<String> types = null; //new ArrayList<>();
-
-        return types;
-    }
-*/
-
-//    abstract ArrayList<Station> loadStations();
-//    abstract ArrayList<CGEnvelope> loadEnvelopes();
 
     public int numberOfStations() { return mStations.size(); }
     public boolean isApproved() {return mIsApproved;}

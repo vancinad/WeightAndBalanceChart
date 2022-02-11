@@ -22,6 +22,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import org.vancinad.aircraft.AircraftType;
+import org.vancinad.aircraft.AircraftTypeFactory;
 import org.vancinad.wbchart.R;
 import org.vancinad.aircraft.Aircraft;
 import org.vancinad.aircraft.Station;
@@ -51,9 +53,17 @@ public class ChartFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         Log.d("ChartFragment", "Begin onCreateView()");
+
         layout = (ConstraintLayout) inflater.inflate(R.layout.fragment_chart, container, false);
         chartViewModel = new ViewModelProvider(this.getActivity()).get(ChartViewModel.class);
-        aircraft = Aircraft.Factory("3A12-172N", "N734BG", 1436.2, 39.26, container.getContext());
+
+        AircraftTypeFactory factory = AircraftTypeFactory.getInstance();
+        assert factory != null; // should have been initialized when activity was started
+
+//        AircraftType type = factory.getType("3A12-172N");
+//        aircraft = new Aircraft(type, "N734BG", 1436.2, 39.26);
+        AircraftType type = factory.getType("3A15-S35");
+        aircraft = new Aircraft(type, "N12PM", 2218.1,76.71);
         /* TODO: Handle negative case */ assert aircraft != null && aircraft.isApproved();
         //test_setAircraftStationWeights(); //TODO: Remove after testing complete
         chartViewModel.setAircraft(aircraft, (chartViewModel.numberOfStations() == 0)); // if chartViewModel is uninitialized, load stations from aircraft's data

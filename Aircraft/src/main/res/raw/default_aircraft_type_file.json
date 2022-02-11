@@ -1,5 +1,6 @@
 {
   "name": "Cessna 172N",
+  "typeId": "3A12-172N",
   "stations": [
     {
       "arm": 46,

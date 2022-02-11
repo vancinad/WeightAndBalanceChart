@@ -139,7 +139,7 @@ public class WBChart {
         i = 0;
         do
         {
-            String label = String.valueOf(this.minGW + i);
+            String label = String.valueOf((int)(this.minGW + i));
             myPaint.getTextBounds(label, 0, label.length(), boundingRect);
             int tickY = (int) (mChartRect.bottom - ((float)i/yScaleWidth) * (mChartRect.bottom - mChartRect.top));
             int textX = mChartRect.left - mTickWidth - (int) myPaint.measureText(label,0,label.length());

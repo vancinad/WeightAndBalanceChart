@@ -11,8 +11,4 @@
     <string name="menu_aircraft">Aircraft</string>
     <string name="menu_types">Types</string>
     <string name="weight_and_balance_chart"><![CDATA[Weight & Balance Chart]]></string>
-
-    <!-- directory names for saved objects -->
-    <string name="dir_types">types</string>
-    <string name="dir_aircraft">aircraft</string>
 </resources>

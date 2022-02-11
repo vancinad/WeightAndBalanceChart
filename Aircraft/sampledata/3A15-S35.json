@@ -1,0 +1,70 @@
+{
+  "name": "Beech Bonanza S35",
+  "typeId": "3A15-S35",
+  "stations": [
+    {
+      "arm": 75,
+      "name": "Fuel, L&R Main"
+    },
+    {
+      "arm": 85,
+      "name": "Front Seats"
+    },
+    {
+      "arm": 121,
+      "name": "Middle Seats"
+    },
+    {
+      "arm": 150,
+      "name": "Rear Seat(s)"
+    },
+    {
+      "arm": 108,
+      "name": "Forward Baggage"
+    },
+    {
+      "arm": 145,
+      "name": "Aft Baggage"
+    }
+  ],
+  "envelopes": [
+    {
+      "name": "Normal",
+      "color": "cyan",
+      "vertices": [
+        {
+          "cg": 77,
+          "weight": 2000
+        },
+        {
+          "cg": 77,
+          "weight": 2800
+        },
+        {
+          "cg": 79,
+          "weight": 3000
+        },
+        {
+          "cg": 82.1,
+          "weight": 3300
+        },
+        {
+          "cg": 84.7,
+          "weight": 3300
+        },
+        {
+          "cg": 85.7,
+          "weight": 3000
+        },
+        {
+          "cg": 85.7,
+          "weight": 2800
+        },
+        {
+          "cg": 85.7,
+          "weight": 2000
+        }
+      ]
+    }
+  ]
+}
