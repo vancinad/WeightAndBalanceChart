@@ -14,11 +14,11 @@ public class ChartViewModel extends ViewModel {
 
 
     Aircraft mAircraft;
-    private ArrayList<MutableLiveData<Double>> weights;
+    ArrayList<MutableLiveData<Double>> mWeights;
 
     /* Constructor */
     public ChartViewModel() {
-        weights = new ArrayList<>();
+        mWeights = new ArrayList<>();
     }
 
     /***
@@ -31,7 +31,7 @@ public class ChartViewModel extends ViewModel {
         Log.d("ChartViewModel", String.format("setStationWeights(): Aircraft=%s, Using %s weights", aircraft.toString(), (useAircraftWeights) ? "aircraft's" : "model's"));
         mAircraft = aircraft;
         if (useAircraftWeights)
-            setStationWeights();
+            initStationWeights();
         else
             aircraft.setStationWeights(getStationWeightsIterator());
 
@@ -39,24 +39,21 @@ public class ChartViewModel extends ViewModel {
     /***
      * Intialize the model's data elements from the aircraft's stations
      */
-    void setStationWeights() {
-        weights.clear();
+    void initStationWeights() {
+        mWeights.clear();
         int numStations = mAircraft.mAircraftType.numberOfStations();
         for (int i=0; i<numStations; i++) {
             MutableLiveData<Double> w = new MutableLiveData<>();
             w.setValue(mAircraft.getStationWeight(i));
-            Log.d("ChartViewModel ",
-                    "setStationWeights: w=" + Double.toString(w.getValue()) +
-                            " index=" + Integer.toString(i) );
-            weights.add(w);
+            Log.d("ChartViewModel", String.format("initStationWeights: w=%f index=%d", w.getValue(), i ));
+            mWeights.add(w);
         }
-        this.mAircraft = mAircraft; // save aircraft reference for later
     }
 
     public MutableLiveData<Double> getStationWeight(int index) {
         MutableLiveData<Double> d = null;
         try {
-            d = weights.get(index);
+            d = mWeights.get(index);
         }
         catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
@@ -64,24 +61,36 @@ public class ChartViewModel extends ViewModel {
         return d;
     }
 
+    /***
+     * Set the model and aircraft station weights for the given station index.
+     * No update occurs if given weight is same as current for the station.
+     *
+     * @param index Index of the station to be set
+     * @param w New weight for the station
+     * @return true if update is performed. false if exception or if given weight is same as current for the station
+     */
     public boolean setStationWeight(int index, double w) {
         Log.d("ChartViewModel", String.format("setStationWeight: index=%d, w=%f", index, w));
-        boolean successFlag = true;
+        boolean successFlag = false;
+
         try {
-            /* Update aircraft before LiveData, so it's accurate when Observer.onChanged() fires */
-            mAircraft.setStationWeight(index, w);
-            weights.get(index).setValue(w);
+            MutableLiveData<Double> modelStationWeight = mWeights.get(index);
+            if (w != modelStationWeight.getValue()) { //only set if given weight is different
+                /* Update aircraft before LiveData, so it's accurate when Observer.onChanged fires */
+                mAircraft.setStationWeight(index, w);
+                modelStationWeight.setValue(w);
+                successFlag = true;
+            }
         }
-        catch (IndexOutOfBoundsException e) {
-            successFlag = false;
+        catch (IndexOutOfBoundsException | NullPointerException e) {
             e.printStackTrace();
         }
 
         return successFlag;
     }
 
-    Iterator<MutableLiveData<Double>> getStationWeightsIterator() { return weights.iterator(); }
+    Iterator<MutableLiveData<Double>> getStationWeightsIterator() { return mWeights.iterator(); }
 
-    public int numberOfStations() { return weights.size(); }
+    public int numberOfStations() { return mWeights.size(); }
 
 }

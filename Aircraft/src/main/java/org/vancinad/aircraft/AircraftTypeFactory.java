@@ -30,19 +30,18 @@ public class AircraftTypeFactory {
     }
 
     /***
+     *  This method is typically called only once during an application's lifetime. It can theoretically be called multiple times, but this has not been thoroughly tested. Subsequent requests should use getInstance().
      *
      * @param context Application context
      *
-     * @return AircraftTypeFactory singleton
+     * @return AircraftTypeFactory singleton or null if factory startup fails
      */
     public static AircraftTypeFactory getInstance(Context context)
     {
         if (factoryInstance == null)
             factoryInstance = new AircraftTypeFactory();
 
-        start(context);
-
-        return factoryInstance;
+        return start(context) ? factoryInstance : null;
     }
 
     /***
@@ -124,7 +123,12 @@ public class AircraftTypeFactory {
 
         File typeFile = getTypeFile(typeString);
         if (typeFile != null)
-            newType = new AircraftType(typeFile);
+            try {
+                newType = new AircraftType(typeFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+                newType = null;
+            }
 
         if (newType != null)
             if (!newType.isApproved())

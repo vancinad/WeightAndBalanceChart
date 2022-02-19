@@ -1,12 +1,14 @@
 package org.vancinad.wbchart.ui.chart;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.JsonWriter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +23,9 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
+import androidx.navigation.Navigation;
 
 import org.vancinad.aircraft.AircraftType;
 import org.vancinad.aircraft.AircraftTypeFactory;
@@ -28,8 +33,10 @@ import org.vancinad.wbchart.R;
 import org.vancinad.aircraft.Aircraft;
 import org.vancinad.aircraft.Station;
 
+import java.io.StringWriter;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class ChartFragment extends Fragment {
 
@@ -60,26 +67,37 @@ public class ChartFragment extends Fragment {
         AircraftTypeFactory factory = AircraftTypeFactory.getInstance();
         assert factory != null; // should have been initialized when activity was started
 
-//        AircraftType type = factory.getType("3A12-172N");
-//        aircraft = new Aircraft(type, "N734BG", 1436.2, 39.26);
-        AircraftType type = factory.getType("3A15-S35");
-        aircraft = new Aircraft(type, "N12PM", 2218.1,76.71);
+        AircraftType type = factory.getType("3A12-172N");
+        testTypeWriter(type); // TODO: remove after testing
+        aircraft = new Aircraft(type, "N734BG", 1436.2, 39.26);
         /* TODO: Handle negative case */ assert aircraft != null && aircraft.isApproved();
-        //test_setAircraftStationWeights(); //TODO: Remove after testing complete
+
+        // put aircraft info in app menu bar
+        Navigation.findNavController(container).
+                getCurrentDestination().
+                setLabel(String.format(Locale.getDefault(), "%s: %s, %s",
+                        getString(R.string.menu_chart), aircraft.getTailNumber(), aircraft.mAircraftType.getTypeName()));
+
         chartViewModel.setAircraft(aircraft, (chartViewModel.numberOfStations() == 0)); // if chartViewModel is uninitialized, load stations from aircraft's data
-/*
-        if (chartViewModel.numberOfStations() == 0) {
-            // Model not initialized. Load stations and weights from aircraft
-            chartViewModel.setAircraft(aircraft, true);
-        } else {
-            // Model has data. Associate new aircraft and load aircraft from model
-            chartViewModel.setAircraft(aircraft, false);
-        }
-*/
+
+
         wbChart = new WBChart(getChartConfig(), aircraft);
 
         Log.d("ChartFragment", "End onCreateView()");
         return layout;
+    }
+
+    private void testTypeWriter(AircraftType type) {
+        StringWriter sw = new StringWriter();
+        JsonWriter jw = new JsonWriter(sw);
+        jw.setIndent("  ");
+        try {
+            type.write(jw);
+            Log.d("testTypeWriter", sw.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            assert true == false;
+        }
     }
 
     @Override
@@ -91,14 +109,6 @@ public class ChartFragment extends Fragment {
         Log.d("ChartFragment", "End onResume()");
     }
 
-    private void test_setAircraftStationWeights() {
-        Log.d("ChartFragment", "Begin test_setAircraftStationWeights()");
-        double[] weights = {240.0, 380, 100, 50, 20};
-        for (int i=0; i<weights.length; i++)
-            aircraft.setStationWeight(i, weights[i]);
-        Log.d("ChartFragment", "End test_setAircraftStationWeights()");
-    }
-
     /***
      * Create text and edit fields for each aircraft station.
      * Vertical barrier separates texts on left from edits on right.
@@ -107,10 +117,16 @@ public class ChartFragment extends Fragment {
      */
     private void setUI() {
         Log.d("ChartFragment", "Begin setUI()");
-        uiPairs = new ArrayList<>(chartViewModel.numberOfStations());
         Context context = layout.getContext();
+        boolean portrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+        TextView aircraftText = layout.findViewById(R.id.aircraft);
+        String aircraftString = String.format(Locale.getDefault(), "Empty: %.1f, %.2f", aircraft.getEmptyWeight(), aircraft.getEmptyCG());
+        aircraftText.setText(aircraftString);
+
+        uiPairs = new ArrayList<>(chartViewModel.numberOfStations());
         int layoutId = layout.getId();
 
+        // create barrier between texts and entry fields
         Barrier fieldBarrier = new Barrier(context);
         int fieldBarrierId = View.generateViewId();
         fieldBarrier.setId(fieldBarrierId);
@@ -118,7 +134,10 @@ public class ChartFragment extends Fragment {
         fieldBarrier.setType(Barrier.RIGHT);
         layout.addView(fieldBarrier);
 
-        uiPairs.clear();
+        // get barrier separating chart image from fields
+        Barrier imageBarrier = (Barrier) layout.getViewById(R.id.imageView_barrier);
+
+        //uiPairs.clear();
         ArrayList<Station> stations = aircraft.getStations();
         int numStations = aircraft.mAircraftType.numberOfStations();
         EditText editText = null;
@@ -128,20 +147,26 @@ public class ChartFragment extends Fragment {
             int editId = View.generateViewId();
             editText = new EditText(context);
             editText.setId(editId);
+            editText.setTag(new Integer(i)); // save station index for future reference
             editText.setEms(5);
             editText.setInputType(InputType.TYPE_CLASS_NUMBER);
             lp = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lp.startToEnd = fieldBarrierId;
             if (i == 0)
-                lp.topToTop = layoutId;
+                //lp.topToTop = layoutId;
+                lp.topToBottom = R.id.aircraft;
             else
                 lp.topToBottom = uiPairs.get(i-1).editField.getId();
             layout.addView(editText, lp);
 
+            if (!portrait)
+                imageBarrier.addView(editText); // barrier will be right of edit fields
+
             textView = new TextView(context);
             textView.setId(View.generateViewId());
-            String text = String.format("%s (%.1f)", stations.get(i).getName(), stations.get(i).getArm());
-            textView.setText(text);
+            textView.setText(String.format(Locale.getDefault(), "%s (@ %.1f)",
+                    stations.get(i).getName(),
+                    stations.get(i).getArm()));
             lp = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lp.startToStart = layout.getId();
             lp.baselineToBaseline = editId;
@@ -153,10 +178,13 @@ public class ChartFragment extends Fragment {
             uiPair.label = textView;
             uiPairs.add(uiPair);
         }
-        Barrier imageBarrier = (Barrier) layout.getViewById(R.id.imageView_barrier);
-        lp = (ConstraintLayout.LayoutParams) imageBarrier.getLayoutParams();
-        lp.topToBottom = editText.getId(); // constrain image barrier to last edit field
-        imageBarrier.setLayoutParams(lp);
+
+        if (portrait) {
+            // barrier will be below last edit field
+            lp = (ConstraintLayout.LayoutParams) imageBarrier.getLayoutParams();
+            lp.topToBottom = editText.getId(); // constrain image barrier to last edit field
+            imageBarrier.setLayoutParams(lp);
+        }
 
         addWatchers();
         Log.d("ChartFragment", "End setUI()");
@@ -179,8 +207,9 @@ public class ChartFragment extends Fragment {
                 @Override
                 public void onChanged(Double aDouble) {
                     // Notification: Model Data Changed
-                    String editTextString = editText.getText().toString();
                     Log.d("Observer", "onChanged() fired");
+
+                    String editTextString = editText.getText().toString();
                     if (different(aDouble, editTextString)) { // if field text needs updating
                         char separator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
                         String newEditTextString = aDouble.toString();
@@ -206,7 +235,7 @@ public class ChartFragment extends Fragment {
                         Log.d("Observer", String.format("setText(\"%s\")", newEditTextString));
                         editText.setText(newEditTextString);
                     } // end: if (field text needs updating)
-                    wbChart.redraw(); //TODO: figure out sequence problem here. PlotCG not updating correctly.
+                    wbChart.redraw();
                 }
             });
 
@@ -224,27 +253,21 @@ public class ChartFragment extends Fragment {
 
                 @Override
                 public void afterTextChanged(Editable editable) {
+                    Log.d("afterTextChanged", String.format("editable='%s'",
+                            editable));
                     View v = ChartFragment.this.layout.findFocus();
-                    Log.d("afterTextChanged", String.format("Editable='%s', v=%s",
-                            editable.toString(),
-                            (v==null) ? "null" : ((EditText)v).getText() ) );
-                    if(v != null) {
-                        int i = 0;
-                        for (StationUIPair p : uiPairs) {
-                            if (p.editField.equals(v)) {
-                                Log.d("afterTextChanged",
-                                        String.format("Found corresponding view at i=%d", i));
-                                break;
-                            }
-                            i++;
-                        }
-                        double d;
+                    if (v != null) {
+                        int stationIndex = (Integer) v.getTag();
+                        Log.d("afterTextChanged", String.format("View focus at stationIndex=%d",
+                                stationIndex));
+                        double editedWeight;
                         try {
-                            d = Double.parseDouble(editable.toString());
-                        } catch (NumberFormatException e) {
-                            d = 0;
+                            editedWeight = Double.parseDouble(editable.toString());
+                        } catch (NumberFormatException ex) {
+                            ex.printStackTrace();
+                            editedWeight = 0; // if text cannot be parsed, set model weight to 0
                         }
-                        chartViewModel.setStationWeight(i, d);
+                        chartViewModel.setStationWeight(stationIndex, editedWeight);
                     }
                 }
             });

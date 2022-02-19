@@ -15,7 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import org.vancinad.wbchart.R;
 
-public class AircraftFragment extends Fragment {
+public class TypesFragment extends Fragment {
     final String _LOG_TAG = "AircraftFragment";
 
     private TypesViewModel typesViewModel;
@@ -25,7 +25,7 @@ public class AircraftFragment extends Fragment {
         Log.d(_LOG_TAG, "onCreateView() called");
         typesViewModel =
                 new ViewModelProvider(this).get(TypesViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_slideshow, container, false);
+        View root = inflater.inflate(R.layout.fragment_types, container, false);
         final TextView textView = root.findViewById(R.id.text_slideshow);
         typesViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override

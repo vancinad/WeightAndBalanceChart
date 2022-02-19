@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.Log;
 
 import org.json.JSONObject;
@@ -14,6 +15,7 @@ import org.vancinad.aircraft.CGEnvelope;
 import org.vancinad.aircraft.Vertex;
 
 import java.util.Iterator;
+import java.util.Locale;
 
 public class WBChart {
     //set initial values to make sure these get set when we load CG envelopes
@@ -25,6 +27,9 @@ public class WBChart {
     int mTickWidth; // = margin / 4;
     int mXScaleIncrement; // = 1;
     int mYScaleIncrement; // = 100;
+    int mChartBackgroundColor = Color.BLUE;
+    int mChartLinesColor = Color.WHITE;
+
     Canvas mCanvas;
     Rect mChartRect = null;
     Aircraft mAircraft;
@@ -51,6 +56,9 @@ public class WBChart {
         mTickWidth = oChart.getInt("tickWidth");
         mXScaleIncrement = oChart.getInt("xScaleIncrement");
         mYScaleIncrement = oChart.getInt("yScaleIncrement");
+        mChartBackgroundColor = Color.BLUE;
+        mChartLinesColor = Color.WHITE;
+
     }
 
     /***
@@ -105,8 +113,8 @@ public class WBChart {
         mChartRect.top = mMargin;
         mChartRect.bottom = myCanvas.getHeight() - mMargin;
 
-        myCanvas.drawColor(Color.BLUE);
-        myPaint.setColor(Color.WHITE);
+        myCanvas.drawColor(mChartBackgroundColor);
+        myPaint.setColor(mChartLinesColor);
         myPaint.setStyle(Paint.Style.STROKE);
         myPaint.setTextSize(mMargin / 3);
         myCanvas.drawRect(mChartRect, myPaint);
@@ -184,26 +192,49 @@ public class WBChart {
     } // draw()
 
     void plotCG() {
-        double weight = mAircraft.grossWeight();
-        double cg = mAircraft.centerOfGravity();
-        Log.d("plotCG", String.format("Given: weight=%f, cg=%f, canvas=%b", weight, cg, mCanvas));
+        double plotWeight = mAircraft.getGrossWeight();
+        double plotCG = mAircraft.getCG();
+        Log.d("plotCG", String.format("Given: weight=%f, cg=%f, canvas=%b", plotWeight, plotCG, mCanvas));
         // do nothing if no canvas
         if (mCanvas != null) {
-
-            final int radius = mTickHeight;
-            int color = Color.RED;
-
             // adjust weight and cg to something we can plot
-            if (weight < minGW) weight = minGW;
-            else if (weight > maxGW) weight = maxGW;
-            if (cg < minCG) cg = minCG;
-            else if (cg > maxCG) cg = maxCG;
+            if (plotWeight < minGW) plotWeight = minGW;
+            else if (plotWeight > maxGW) plotWeight = maxGW;
+            if (plotCG < minCG) plotCG = minCG;
+            else if (plotCG > maxCG) plotCG = maxCG;
 
-            Point pt = toXY(cg, weight, mChartRect);
+            Point plotPt = toXY(plotCG, plotWeight, mChartRect);
             Paint paint = new Paint();
-            paint.setColor(color);
-            Log.d("plotCG", String.format("Plotted: weight=%f, cg=%f, x=%d, y=%d", weight, cg, pt.x, pt.y));
-            mCanvas.drawCircle(pt.x, pt.y, radius, paint);
+            paint.setColor(Color.RED); // dot color
+            final int radius = mTickHeight; // use tick height as dot radius
+            Log.d("plotCG", String.format("Drawing weight=%f, cg=%f, x=%d, y=%d", plotWeight, plotCG, plotPt.x, plotPt.y));
+            mCanvas.drawCircle(plotPt.x, plotPt.y, radius, paint);
+
+            //draw plot label
+            //position toward center of the chart relative to plot point
+            String plotLabel = String.format(Locale.getDefault(), "(%.1f, %.2f)", mAircraft.getGrossWeight(), mAircraft.getCG());
+            final int o = (int) (radius * 1.5); // label offset in pixels
+            Rect labelBounds = new Rect();
+            paint.setTextSize(mMargin / 3);
+
+            paint.getTextBounds(plotLabel, 0, plotLabel.length(), labelBounds); // measure the label text
+
+            // determine x and y (bottom-left) for the plot label
+            float labelX = (plotPt.x < mChartRect.centerX()) ?  // if pt is left of center...
+                plotPt.x + o : // ...put label to right
+                plotPt.x - labelBounds.width() - o; // else put label to left
+            float labelY = (plotPt.y < mChartRect.centerY()) ? // if pt is above center...
+                plotPt.y + labelBounds.height() + o : // put label below
+                plotPt.y - o; // else put label above
+
+            int bgMargin = 20;
+            RectF labelBackground = new RectF(labelBounds.left, labelBounds.top - bgMargin, labelBounds.right + bgMargin, labelBounds.bottom);
+            labelBackground.offsetTo((int)labelX, (int)labelY - labelBounds.height() - bgMargin/2);
+            paint.setColor(Color.DKGRAY);
+            mCanvas.drawRoundRect(labelBackground, radius, radius, paint);
+
+            paint.setColor(mChartLinesColor);
+            mCanvas.drawText(plotLabel, labelX + bgMargin/2, labelY - bgMargin/2, paint);
         }
     }
 
