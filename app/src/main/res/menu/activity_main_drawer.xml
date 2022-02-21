@@ -9,11 +9,11 @@
             android:icon="@drawable/ic__0200429174214_black_aircraft_icon"
             android:title="@string/menu_chart" />
         <item
-            android:id="@+id/nav_gallery"
+            android:id="@+id/nav_aircraft"
             android:icon="@drawable/ic_launcher_foreground"
             android:title="@string/menu_aircraft" />
         <item
-            android:id="@+id/nav_slideshow"
+            android:id="@+id/nav_types"
             android:icon="@drawable/ic_launcher_foreground"
             android:title="@string/menu_types" />
     </group>

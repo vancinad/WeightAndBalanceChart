@@ -15,53 +15,33 @@ import java.io.InputStreamReader;
 public class AircraftTypeFactory {
     static final String _LOG_TAG = "AircraftTypeFactory";
 
-    //TODO: "Do not place Android context classes in static fields; this is a memory leak."
-    static AircraftTypeFactory factoryInstance = null;
-    static Context mContext = null;
+    static AircraftTypeFactory factoryInstance = new AircraftTypeFactory();
+    Context mContext = null;
+    File mTypeFilesDir = null;
 
-    static File mTypeFilesDir = null;
-
-    /***
-     *
-     * @return The AircraftTypeFactory singleton or null if mContext has not been set
-     */
-    public static AircraftTypeFactory getInstance() {
-        return (mContext != null) ? getInstance(mContext) : null;
-    }
+    /* This class is a singleton */
+    private AircraftTypeFactory() {}  // private constructor
+    public static AircraftTypeFactory getInstance() { return factoryInstance; } // instance getter
 
     /***
-     *  This method is typically called only once during an application's lifetime. It can theoretically be called multiple times, but this has not been thoroughly tested. Subsequent requests should use getInstance().
+     *  This method is typically called only once during an application's lifetime. It can theoretically be called multiple times, but this has not been thoroughly tested. Unless new context is required, subsequent requests should use getInstance().
      *
      * @param context Application context
      *
      * @return AircraftTypeFactory singleton or null if factory startup fails
      */
-    public static AircraftTypeFactory getInstance(Context context)
-    {
-        if (factoryInstance == null)
-            factoryInstance = new AircraftTypeFactory();
-
-        return start(context) ? factoryInstance : null;
-    }
-
-    /***
-     *
-     * @param context Owning context.
-     */
-    public static boolean start(Context context) {
+    public boolean start(Context context) {
         mContext = context;
         return setFileDirs(); // setup paths for required files
     }
 
-    static boolean setFileDirs() {
-        boolean dirIsValid;
-        File baseDir = mContext.getFilesDir();
-        File typesDir = new File(baseDir, mContext.getString(R.string.dir_types));
-        typesDir.mkdirs();
+    boolean setFileDirs() {
 
-        dirIsValid = isUsableDir(typesDir);
+        boolean dirIsValid = false;
 
-        if (dirIsValid) {
+        File typesDir = Util.getDataDir(mContext.getString(R.string.dir_types), mContext);
+
+        if (typesDir != null) {
             mTypeFilesDir = typesDir;
             dirIsValid = initTypeFilesDir();
         }
@@ -69,7 +49,7 @@ public class AircraftTypeFactory {
         return dirIsValid;
     }
 
-    private static boolean initTypeFilesDir() {
+    boolean initTypeFilesDir() {
         // make sure types dir has at least one file in it
         File[] filesList = mTypeFilesDir.listFiles();
         boolean dirIsValid = filesList!=null && filesList.length > 0; //if files found, assume dir is OK
@@ -95,25 +75,6 @@ public class AircraftTypeFactory {
                 dirIsValid = false;
                 e.printStackTrace();
             }
-        }
-        return dirIsValid;
-    }
-
-    private static boolean isUsableDir(File dir) {
-        // make sure typesDir is readable, writable, and a directory
-        boolean dirIsValid = true;
-
-        if (!dir.canRead()) {
-            Log.d(_LOG_TAG, String.format("%s is not readable", dir.toString()));
-            dirIsValid = false;
-        }
-        if (!dir.canWrite()) {
-            Log.d(_LOG_TAG, String.format("%s is not writable", dir.toString()));
-            dirIsValid = false;
-        }
-        if (!dir.isDirectory()) {
-            Log.d(_LOG_TAG, String.format("%s is not a directory", dir.toString()));
-            dirIsValid = false;
         }
         return dirIsValid;
     }
@@ -156,9 +117,5 @@ public class AircraftTypeFactory {
         }
         return typeFile;
     }
-    /***
-     *  Private constructor. Use AircraftTypeFactory.getInstance(...)
-     */
-    private AircraftTypeFactory() {}
 
 }

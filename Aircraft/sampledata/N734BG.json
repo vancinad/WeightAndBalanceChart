@@ -1,0 +1,92 @@
+{
+  "tailNumber": "N734BG",
+  "emptyWeight": 1436.2,
+  "emptyCG": 39.26,
+  "type": {
+    "name": "Cessna 172N",
+    "typeId": "3A12-172N",
+    "stations": [
+      {
+        "arm": 46.0,
+        "name": "Fuel"
+      },
+      {
+        "arm": 37.0,
+        "name": "Front Seats"
+      },
+      {
+        "arm": 73.0,
+        "name": "Rear Seats"
+      },
+      {
+        "arm": 95.0,
+        "name": "Baggage 1"
+      },
+      {
+        "arm": 123.0,
+        "name": "Baggage 2 (middle)"
+      }
+    ],
+    "envelopes": [
+      {
+        "name": "Normal",
+        "color": "cyan",
+        "vertices": [
+          {
+            "cg": 35.0,
+            "weight": 1500.0
+          },
+          {
+            "cg": 35.0,
+            "weight": 1950.0
+          },
+          {
+            "cg": 38.5,
+            "weight": 2300.0
+          },
+          {
+            "cg": 47.3,
+            "weight": 2300.0
+          },
+          {
+            "cg": 47.3,
+            "weight": 1500.0
+          }
+        ]
+      },
+      {
+        "name": "Utility",
+        "color": "green",
+        "vertices": [
+          {
+            "cg": 35.0,
+            "weight": 1500.0
+          },
+          {
+            "cg": 35.0,
+            "weight": 1950.0
+          },
+          {
+            "cg": 35.5,
+            "weight": 2000.0
+          },
+          {
+            "cg": 40.5,
+            "weight": 2000.0
+          },
+          {
+            "cg": 40.5,
+            "weight": 1500.0
+          }
+        ]
+      }
+    ]
+  },
+  "stationWeights": [
+    240.0,
+    380.0,
+    100.0,
+    100.0,
+    25.0
+  ]
+}

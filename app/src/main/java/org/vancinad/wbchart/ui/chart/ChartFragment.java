@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.JsonWriter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,25 +20,23 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.Barrier;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 
-import org.vancinad.aircraft.AircraftType;
-import org.vancinad.aircraft.AircraftTypeFactory;
-import org.vancinad.wbchart.R;
 import org.vancinad.aircraft.Aircraft;
+import org.vancinad.aircraft.AircraftTypeFactory;
 import org.vancinad.aircraft.Station;
+import org.vancinad.wbchart.R;
 
-import java.io.StringWriter;
+import java.io.IOException;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class ChartFragment extends Fragment {
 
+    static final String _LOG_TAG = "ChartFragment";
+    
     private ChartViewModel chartViewModel;
     ConstraintLayout layout;
     Aircraft aircraft;
@@ -59,7 +56,7 @@ public class ChartFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        Log.d("ChartFragment", "Begin onCreateView()");
+        Log.d(_LOG_TAG, "Begin onCreateView()");
 
         layout = (ConstraintLayout) inflater.inflate(R.layout.fragment_chart, container, false);
         chartViewModel = new ViewModelProvider(this.getActivity()).get(ChartViewModel.class);
@@ -67,10 +64,17 @@ public class ChartFragment extends Fragment {
         AircraftTypeFactory factory = AircraftTypeFactory.getInstance();
         assert factory != null; // should have been initialized when activity was started
 
-        AircraftType type = factory.getType("3A12-172N");
-        testTypeWriter(type); // TODO: remove after testing
-        aircraft = new Aircraft(type, "N734BG", 1436.2, 39.26);
-        /* TODO: Handle negative case */ assert aircraft != null && aircraft.isApproved();
+        try {
+            aircraft = Aircraft.getByTailNumber("N734BG");
+        } catch (IOException e) {
+            e.printStackTrace();
+            final String msg = "getByTailNumber exception. Using default aircraft";
+            Log.d(_LOG_TAG, msg);
+            //Snackbar.make(layout.getRootView(), msg, Snackbar.LENGTH_LONG).show();
+            aircraft = Aircraft.getDebugAircraft(factory.getType("3A12-172N"), "N734BG", 1436.2, 39.26);
+        }
+        if (aircraft == null || !aircraft.isApproved())
+            Log.d(_LOG_TAG, "Unapproved aircraft, tail '%s' (this probably won't end well)");
 
         // put aircraft info in app menu bar
         Navigation.findNavController(container).
@@ -83,30 +87,23 @@ public class ChartFragment extends Fragment {
 
         wbChart = new WBChart(getChartConfig(), aircraft);
 
-        Log.d("ChartFragment", "End onCreateView()");
+        Log.d(_LOG_TAG, "End onCreateView()");
         return layout;
-    }
-
-    private void testTypeWriter(AircraftType type) {
-        StringWriter sw = new StringWriter();
-        JsonWriter jw = new JsonWriter(sw);
-        jw.setIndent("  ");
-        try {
-            type.write(jw);
-            Log.d("testTypeWriter", sw.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-            assert true == false;
-        }
     }
 
     @Override
     public void onResume() {
-        Log.d("ChartFragment", "Begin onResume()");
+        Log.d(_LOG_TAG, "Begin onResume()");
         super.onResume();
         setUI();
         addChart();
-        Log.d("ChartFragment", "End onResume()");
+        Log.d(_LOG_TAG, "End onResume()");
+    }
+
+    public void onDestroyView() {
+        Log.d(_LOG_TAG, "Begin onDestroy");
+        aircraft.write();
+        super.onDestroyView();
     }
 
     /***
@@ -116,15 +113,15 @@ public class ChartFragment extends Fragment {
      *
      */
     private void setUI() {
-        Log.d("ChartFragment", "Begin setUI()");
+        Log.d(_LOG_TAG, "Begin setUI()");
         Context context = layout.getContext();
         boolean portrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
         TextView aircraftText = layout.findViewById(R.id.aircraft);
-        String aircraftString = String.format(Locale.getDefault(), "Empty: %.1f, %.2f", aircraft.getEmptyWeight(), aircraft.getEmptyCG());
+        String aircraftString = String.format(Locale.getDefault(), "Empty: %.1f @ %.2f", aircraft.getEmptyWeight(), aircraft.getEmptyCG());
         aircraftText.setText(aircraftString);
 
         uiPairs = new ArrayList<>(chartViewModel.numberOfStations());
-        int layoutId = layout.getId();
+//        int layoutId = layout.getId();
 
         // create barrier between texts and entry fields
         Barrier fieldBarrier = new Barrier(context);
@@ -147,7 +144,7 @@ public class ChartFragment extends Fragment {
             int editId = View.generateViewId();
             editText = new EditText(context);
             editText.setId(editId);
-            editText.setTag(new Integer(i)); // save station index for future reference
+            editText.setTag(i); // save station index for future reference
             editText.setEms(5);
             editText.setInputType(InputType.TYPE_CLASS_NUMBER);
             lp = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -187,7 +184,7 @@ public class ChartFragment extends Fragment {
         }
 
         addWatchers();
-        Log.d("ChartFragment", "End setUI()");
+        Log.d(_LOG_TAG, "End setUI()");
     }
 
     /***
@@ -196,47 +193,44 @@ public class ChartFragment extends Fragment {
      * Set up all observers and listeners
      */
     private void addWatchers() {
-        Log.d("ChartFragment", "Begin addWatchers()");
+        Log.d(_LOG_TAG, "Begin addWatchers()");
         int numStations = aircraft.mAircraftType.numberOfStations();
         for (int i=0; i<numStations; i++) {
-            Log.d("ChartFragment", String.format("addWatchers(): station index=%d", i));
+            Log.d(_LOG_TAG, String.format("addWatchers(): station index=%d", i));
             EditText editText = uiPairs.get(i).editField;
 
             // Create Observer to watch the chartViewModel data
-            chartViewModel.getStationWeight(i).observe(getViewLifecycleOwner(), new Observer<Double>() {
-                @Override
-                public void onChanged(Double aDouble) {
-                    // Notification: Model Data Changed
-                    Log.d("Observer", "onChanged() fired");
+            chartViewModel.getStationWeight(i).observe(getViewLifecycleOwner(), aDouble -> {
+                // Notification: Model Data Changed
+                Log.d("Observer", "onChanged() fired");
 
-                    String editTextString = editText.getText().toString();
-                    if (different(aDouble, editTextString)) { // if field text needs updating
-                        char separator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
-                        String newEditTextString = aDouble.toString();
-                        /*
-                            Now decide if decimal portion should be stripped.
-                            Most values will be int, by doing this we don't clutter up the UI
-                            with a bunch of needless ".0"s.
-                         */
-                        boolean editTextHasDecimal = (editTextString.indexOf(separator) != -1);
-                        if (!editTextHasDecimal) {
-                            // if currently displayed text has decimal portion, leave it. Otherwise...
-                            double fieldVal = editTextString.isEmpty() ? 0 : Double.parseDouble(editTextString);
-                            boolean fieldValIsInt = fieldVal == (int) fieldVal;
-                            boolean doubleValIsInt = aDouble == aDouble.intValue();
-                            if (fieldValIsInt && doubleValIsInt) {
-                                // strip decimal portion from new text
-                                int sepIndex = newEditTextString.indexOf(separator);
-                                if (sepIndex != -1) {
-                                    newEditTextString = newEditTextString.substring(0, sepIndex);
-                                }
+                String editTextString = editText.getText().toString();
+                if (different(aDouble, editTextString)) { // if field text needs updating
+                    char separator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
+                    String newEditTextString = aDouble.toString();
+                    /*
+                        Now decide if decimal portion should be stripped.
+                        Most values will be int, by doing this we don't clutter up the UI
+                        with a bunch of needless ".0"s.
+                     */
+                    boolean editTextHasDecimal = (editTextString.indexOf(separator) != -1);
+                    if (!editTextHasDecimal) {
+                        // if currently displayed text has decimal portion, leave it. Otherwise...
+                        double fieldVal = editTextString.isEmpty() ? 0 : Double.parseDouble(editTextString);
+                        boolean fieldValIsInt = fieldVal == (int) fieldVal;
+                        boolean doubleValIsInt = aDouble == aDouble.intValue();
+                        if (fieldValIsInt && doubleValIsInt) {
+                            // strip decimal portion from new text
+                            int sepIndex = newEditTextString.indexOf(separator);
+                            if (sepIndex != -1) {
+                                newEditTextString = newEditTextString.substring(0, sepIndex);
                             }
                         }
-                        Log.d("Observer", String.format("setText(\"%s\")", newEditTextString));
-                        editText.setText(newEditTextString);
-                    } // end: if (field text needs updating)
-                    wbChart.redraw();
-                }
+                    }
+                    Log.d("Observer", String.format("setText(\"%s\")", newEditTextString));
+                    editText.setText(newEditTextString);
+                } // end: if (field text needs updating)
+                wbChart.redraw();
             });
 
             // create Listener to watch the edit field
@@ -272,12 +266,12 @@ public class ChartFragment extends Fragment {
                 }
             });
         }
-        Log.d("ChartFragment", "End addWatchers()");
+        Log.d(_LOG_TAG, "End addWatchers()");
     }
 
     private void addChart()
     {
-        Log.d("ChartFragment", "Begin addChart()");
+        Log.d(_LOG_TAG, "Begin addChart()");
 
         ImageView chartView = layout.findViewById(R.id.imageView_chart);
 
@@ -291,30 +285,12 @@ public class ChartFragment extends Fragment {
         wbChart.draw(chartCanvas);
 
         chartView.setImageBitmap(chartBitmap);
-        Log.d("ChartFragment", "End addChart()");
+        Log.d(_LOG_TAG, "End addChart()");
     }
 
     String getChartConfig()
     {
-/*
-        String config =
-                "{envelope: {" +
-                        "minGW: 1500," +
-                        "maxGW: 2400," +
-                        "minCG: 34," +
-                        "maxCG: 48" +
-                        "}," +
-                        "chart: {" +
-                        "margin: 100," +
-                        "tickHeight: 12," +
-                        "tickWidth: 12," +
-                        "xScaleIncrement: 1," +
-                        "yScaleIncrement: 100" +
-                        "}" +
-                        "}";
-*/
-
-        // config2 omits envelope
+        //TODO: read from config file
         final String config2 =
                 "{chart: {" +
                             "margin: 100," +
@@ -331,9 +307,9 @@ public class ChartFragment extends Fragment {
      * different -- Safely compare double to String containing a double. Treat empty string as equal to 0.
      * Default to "different" if NumberFormatException occurs.
      *
-     * @param d
-     * @param numString
-     * @return
+     * @param d numeric value
+     * @param numString String representation
+     * @return true if different or can't parse numString
      */
     boolean different(double d, String numString) {
         boolean dif = true;

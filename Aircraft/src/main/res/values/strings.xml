@@ -4,6 +4,7 @@
     <!-- directory names for saved objects -->
     <string name="dir_types">types</string>
     <string name="dir_aircraft">aircraft</string>
+    <string name="dir_config">config</string>
 
     <string name="default_aircraft_type_id">3A12-172N</string>
 

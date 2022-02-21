@@ -32,11 +32,8 @@
         android:contentDescription="@string/weight_and_balance_chart"
         app:layout_constraintTop_toTopOf="@id/chartLayout"
         app:layout_constraintStart_toEndOf="@id/imageView_barrier"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- ImageView scrap
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="@id/chartLayout"
-        android:src="@drawable/ic_menu_camera"
+        />
 
-    -->
 </androidx.constraintlayout.widget.ConstraintLayout>

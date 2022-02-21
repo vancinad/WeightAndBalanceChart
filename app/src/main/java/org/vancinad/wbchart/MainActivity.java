@@ -14,6 +14,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import org.vancinad.aircraft.AircraftFactory;
 import org.vancinad.aircraft.AircraftTypeFactory;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d("MainActivity", "onCreate() called");
-        AircraftTypeFactory.start(this.getApplicationContext());  // initialize factory singleton
+        AircraftFactory.getInstance().start(this.getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -43,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_chart, R.id.nav_gallery, R.id.nav_slideshow)
+                R.id.nav_chart, R.id.nav_aircraft, R.id.nav_types)
                 //deprecated: .setDrawerLayout(drawer)
                 .setOpenableLayout(drawer)
                 .build();
