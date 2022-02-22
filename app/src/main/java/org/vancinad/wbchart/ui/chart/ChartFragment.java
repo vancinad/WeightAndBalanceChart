@@ -23,11 +23,14 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import org.vancinad.aircraft.Aircraft;
 import org.vancinad.aircraft.AircraftTypeFactory;
 import org.vancinad.aircraft.Station;
 import org.vancinad.wbchart.R;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
@@ -39,7 +42,8 @@ public class ChartFragment extends Fragment {
     
     private ChartViewModel chartViewModel;
     ConstraintLayout layout;
-    Aircraft aircraft;
+    Aircraft mAircraft;
+    ChartConfig mChartConfig;
     WBChart wbChart;
 
     ArrayList<StationUIPair> uiPairs;
@@ -64,28 +68,53 @@ public class ChartFragment extends Fragment {
         AircraftTypeFactory factory = AircraftTypeFactory.getInstance();
         assert factory != null; // should have been initialized when activity was started
 
+        try { // load config info, including MRU tail number
+            mChartConfig = new ChartConfig(this.requireContext());
+        } catch (IOException e) {
+            e.printStackTrace();
+            assert false; // TODO: find a way to handle this gracefully?
+        }
+
+        String initTailNumber = null;
+        Bundle bundle = getArguments();
+        if (bundle == null) {
+            Log.d(_LOG_TAG, "Bundle = null");
+        } else {
+            initTailNumber = bundle.getString("tailNumber");
+            Log.d(_LOG_TAG, String.format("Tail number from Bundle: '%s'", initTailNumber));
+        }
+        if (initTailNumber == null) {
+            Log.d(_LOG_TAG, "Trying default tail number...");
+            initTailNumber = mChartConfig.mMostRecentTailNumber;
+        }
+
+        if (initTailNumber == null) { //still no tail number
+            Log.d(_LOG_TAG, "No tail number, Going to aircraft selection...");
+            //TODO: This fails when startDestination is id/nav_chart -- find a fix
+            Navigation.findNavController(getView()).navigate(R.id.nav_aircraft); //go to aircraft fragment
+        }
+
         try {
-            aircraft = Aircraft.getByTailNumber("N734BG");
+            mAircraft = Aircraft.getByTailNumber(initTailNumber);
         } catch (IOException e) {
             e.printStackTrace();
             final String msg = "getByTailNumber exception. Using default aircraft";
             Log.d(_LOG_TAG, msg);
             //Snackbar.make(layout.getRootView(), msg, Snackbar.LENGTH_LONG).show();
-            aircraft = Aircraft.getDebugAircraft(factory.getType("3A12-172N"), "N734BG", 1436.2, 39.26);
+            mAircraft = Aircraft.getDebugAircraft(factory.getType("3A12-172N"), "N734BG", 1436.2, 39.26);
         }
-        if (aircraft == null || !aircraft.isApproved())
+        if (mAircraft == null || !mAircraft.isApproved())
             Log.d(_LOG_TAG, "Unapproved aircraft, tail '%s' (this probably won't end well)");
 
         // put aircraft info in app menu bar
         Navigation.findNavController(container).
                 getCurrentDestination().
                 setLabel(String.format(Locale.getDefault(), "%s: %s, %s",
-                        getString(R.string.menu_chart), aircraft.getTailNumber(), aircraft.mAircraftType.getTypeName()));
+                        getString(R.string.menu_chart), mAircraft.getTailNumber(), mAircraft.mAircraftType.getTypeName()));
 
-        chartViewModel.setAircraft(aircraft, (chartViewModel.numberOfStations() == 0)); // if chartViewModel is uninitialized, load stations from aircraft's data
+        chartViewModel.setAircraft(mAircraft, (chartViewModel.numberOfStations() == 0)); // if chartViewModel is uninitialized, load stations from aircraft's data
 
-
-        wbChart = new WBChart(getChartConfig(), aircraft);
+        wbChart = new WBChart(mChartConfig, mAircraft);
 
         Log.d(_LOG_TAG, "End onCreateView()");
         return layout;
@@ -102,7 +131,12 @@ public class ChartFragment extends Fragment {
 
     public void onDestroyView() {
         Log.d(_LOG_TAG, "Begin onDestroy");
-        aircraft.write();
+
+        mAircraft.write(); // save aircraft data
+
+        mChartConfig.mMostRecentTailNumber = mAircraft.getTailNumber();
+        mChartConfig.write(); // save chart config
+
         super.onDestroyView();
     }
 
@@ -117,7 +151,7 @@ public class ChartFragment extends Fragment {
         Context context = layout.getContext();
         boolean portrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
         TextView aircraftText = layout.findViewById(R.id.aircraft);
-        String aircraftString = String.format(Locale.getDefault(), "Empty: %.1f @ %.2f", aircraft.getEmptyWeight(), aircraft.getEmptyCG());
+        String aircraftString = String.format(Locale.getDefault(), "Empty: %.1f @ %.2f", mAircraft.getEmptyWeight(), mAircraft.getEmptyCG());
         aircraftText.setText(aircraftString);
 
         uiPairs = new ArrayList<>(chartViewModel.numberOfStations());
@@ -135,8 +169,8 @@ public class ChartFragment extends Fragment {
         Barrier imageBarrier = (Barrier) layout.getViewById(R.id.imageView_barrier);
 
         //uiPairs.clear();
-        ArrayList<Station> stations = aircraft.getStations();
-        int numStations = aircraft.mAircraftType.numberOfStations();
+        ArrayList<Station> stations = mAircraft.getStations();
+        int numStations = mAircraft.mAircraftType.numberOfStations();
         EditText editText = null;
         TextView textView;
         ConstraintLayout.LayoutParams lp;
@@ -194,7 +228,7 @@ public class ChartFragment extends Fragment {
      */
     private void addWatchers() {
         Log.d(_LOG_TAG, "Begin addWatchers()");
-        int numStations = aircraft.mAircraftType.numberOfStations();
+        int numStations = mAircraft.mAircraftType.numberOfStations();
         for (int i=0; i<numStations; i++) {
             Log.d(_LOG_TAG, String.format("addWatchers(): station index=%d", i));
             EditText editText = uiPairs.get(i).editField;
@@ -290,17 +324,22 @@ public class ChartFragment extends Fragment {
 
     String getChartConfig()
     {
-        //TODO: read from config file
-        final String config2 =
+        File configFile = new File(getContext().getFilesDir(), "config.json");
+        String configString =
                 "{chart: {" +
-                            "margin: 100," +
-                            "tickHeight: 12," +
-                            "tickWidth: 12," +
-                            "xScaleIncrement: 1," +
-                            "yScaleIncrement: 100" +
+                        "margin: 100," +
+                        "tickHeight: 12," +
+                        "tickWidth: 12," +
+                        "xScaleIncrement: 1," +
+                        "yScaleIncrement: 100" +
                         "}" +
-                "}";
-        return config2;
+                        "}";
+
+        if (configFile.exists()) {
+
+        }
+
+        return configString;
     }
 
     /***

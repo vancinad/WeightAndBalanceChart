@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class AircraftFactory {
     static AircraftFactory mInstance = null; //
-    Context mContext;
+//    Context mContext;
     File mAircraftDir; // directory containing aircraft definitions
 
     private AircraftFactory() {} // private constructor
@@ -24,9 +24,9 @@ public class AircraftFactory {
      * @return true if startup was successful, false if not
      */
     public boolean start(Context c) {
-        mContext = c;
-        mAircraftDir = Util.getDataDir(mContext.getString(R.string.dir_aircraft), mContext);
-        boolean typeFactoryStarted = AircraftTypeFactory.getInstance().start(mContext);  // initialize factory singleton
+        Context appContext = c.getApplicationContext(); // make sure we have ApplicationContext
+        mAircraftDir = Util.getDataDir(appContext.getString(R.string.dir_aircraft), appContext);
+        boolean typeFactoryStarted = AircraftTypeFactory.getInstance().start(appContext);  // initialize factory singleton
 
         return (mAircraftDir != null && typeFactoryStarted);
     }

@@ -18,29 +18,32 @@ import java.util.Iterator;
 import java.util.Locale;
 
 public class WBChart {
-    //set initial values to make sure these get set when we load CG envelopes
+    //set initial values to make sure they're replaced when we load CG envelopes
     double minGW = Double.MAX_VALUE, maxGW = Double.MIN_VALUE;
     double minCG = Double.MAX_VALUE, maxCG = Double.MIN_VALUE;
 
-    int mMargin; // = 50;
-    int mTickHeight; // = margin / 4;
-    int mTickWidth; // = margin / 4;
-    int mXScaleIncrement; // = 1;
-    int mYScaleIncrement; // = 100;
-    int mChartBackgroundColor = Color.BLUE;
-    int mChartLinesColor = Color.WHITE;
+    int mMargin;
+    int mTickHeight;
+    int mTickWidth;
+    int mXScaleIncrement;
+    int mYScaleIncrement;
+    int mChartBackgroundColor;
+    int mChartLinesColor;
 
     Canvas mCanvas;
     Rect mChartRect = null;
     Aircraft mAircraft;
 
 
-    public WBChart(String config, Aircraft aircraft) {
-        try {
-            setConfig(config); // TODO: Read json config from file
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public WBChart(ChartConfig chartConfig, Aircraft aircraft) {
+
+        mMargin = chartConfig.mMargin;
+        mTickHeight = chartConfig.mTickHeight;
+        mTickWidth = chartConfig.mTickWidth;
+        mXScaleIncrement = chartConfig.mXScaleIncrement;
+        mYScaleIncrement = chartConfig.mYScaleIncrement;
+        mChartBackgroundColor = chartConfig.mChartBackgroundColor;
+        mChartLinesColor = chartConfig.mChartLinesColor;
         mAircraft = aircraft;
         setChartRange();
 

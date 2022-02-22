@@ -16,7 +16,7 @@ public class AircraftTypeFactory {
     static final String _LOG_TAG = "AircraftTypeFactory";
 
     static AircraftTypeFactory factoryInstance = new AircraftTypeFactory();
-    Context mContext = null;
+//    Context mContext = null;
     File mTypeFilesDir = null;
 
     /* This class is a singleton */
@@ -26,39 +26,39 @@ public class AircraftTypeFactory {
     /***
      *  This method is typically called only once during an application's lifetime. It can theoretically be called multiple times, but this has not been thoroughly tested. Unless new context is required, subsequent requests should use getInstance().
      *
-     * @param context Application context
+     * @param context context.getApplicationContext() will be used by AircraftTypeFactory for initialization
      *
      * @return AircraftTypeFactory singleton or null if factory startup fails
      */
     public boolean start(Context context) {
-        mContext = context;
-        return setFileDirs(); // setup paths for required files
+        Context appContext = context.getApplicationContext();
+        return setFileDirs(appContext); // setup paths for required files
     }
 
-    boolean setFileDirs() {
+    boolean setFileDirs(Context appContext) {
 
         boolean dirIsValid = false;
 
-        File typesDir = Util.getDataDir(mContext.getString(R.string.dir_types), mContext);
+        File typesDir = Util.getDataDir(appContext.getString(R.string.dir_types), appContext);
 
         if (typesDir != null) {
             mTypeFilesDir = typesDir;
-            dirIsValid = initTypeFilesDir();
+            dirIsValid = initTypeFilesDir(appContext);
         }
 
         return dirIsValid;
     }
 
-    boolean initTypeFilesDir() {
+    boolean initTypeFilesDir(Context appContext) {
         // make sure types dir has at least one file in it
         File[] filesList = mTypeFilesDir.listFiles();
         boolean dirIsValid = filesList!=null && filesList.length > 0; //if files found, assume dir is OK
         if (filesList!=null && filesList.length == 0) // dir is OK but is empty
         {
             //if no files found, try creating one default type file
-            Resources r = mContext.getResources();
+            Resources r = appContext.getResources();
             InputStreamReader isr = new InputStreamReader(r.openRawResource(R.raw.default_aircraft_type_file));
-            File newFile = new File(mTypeFilesDir, mContext.getString(R.string.default_aircraft_type_id)+".json");
+            File newFile = new File(mTypeFilesDir, appContext.getString(R.string.default_aircraft_type_id)+".json");
             try {
 //                FileOutputStream newFOS = mContext.openFileOutput(newFile.toString(), 0);
                 FileOutputStream newFOS = new FileOutputStream(newFile);

@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_chart">
-
+    app:startDestination="@+id/nav_aircraft">
+<!--TODO: Changed startDestination to avoid "no MRU aircraft" problem. Find a fix that allows nav_chart to be the start when MRU available, else start on nav_aircraft -->
     <fragment
         android:id="@+id/nav_chart"
         android:name="org.vancinad.wbchart.ui.chart.ChartFragment"
@@ -15,7 +15,11 @@
         android:id="@+id/nav_aircraft"
         android:name="org.vancinad.wbchart.ui.aircraft.AircraftFragment"
         android:label="@string/menu_aircraft"
-        tools:layout="@layout/fragment_aircraft" />
+        tools:layout="@layout/fragment_aircraft" >
+        <action
+            android:id="@+id/action_nav_aircraft_to_nav_chart"
+            app:destination="@id/nav_chart" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_types"

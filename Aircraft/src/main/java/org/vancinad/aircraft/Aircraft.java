@@ -42,6 +42,7 @@ public class Aircraft {
      * @return Aircraft instance. Callers should call isApproved() on the returned instance to confirm airworthiness
      */
     static public Aircraft getByTailNumber(String tailNumber) throws IOException {
+        Log.d(_LOG_TAG, String.format("Begin: getByTailNumber('%s')", tailNumber));
         File f = AircraftFactory.getInstance().getFileFor(tailNumber);
         Aircraft a = null;
 

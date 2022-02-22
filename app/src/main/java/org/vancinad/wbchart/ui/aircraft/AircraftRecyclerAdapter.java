@@ -1,5 +1,6 @@
 package org.vancinad.wbchart.ui.aircraft;
 
+import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +8,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -16,7 +20,7 @@ import org.vancinad.wbchart.R;
 public class AircraftRecyclerAdapter extends RecyclerView.Adapter<AircraftRecyclerAdapter.ViewHolder> {
 
     String[] mAircraftStrings;
-    final String[] debuggingStrings= {"N113QW", "N127HJ", "N135MN", "N147HJ", "N155MN", "N167HJ", "N175MN", "N187HJ", "N195MN", "N207HJ", "N215MN", "N227HJ", "N235MN", "N247HJ", "N255MN", "N267HJ", "N275MN", "N287HJ", "N295MN", "N307HJ", "N315MN"};
+    final String[] debuggingStrings= {"N113QW", "N127HJ", "N734BG", "N147HJ", "N155MN", "N167HJ", "N175MN", "N187HJ", "N195MN", "N207HJ", "N215MN", "N227HJ", "N235MN", "N247HJ", "N255MN", "N267HJ", "N275MN", "N287HJ", "N295MN", "N307HJ", "N315MN"};
 
     public AircraftRecyclerAdapter() {
         //TODO: Implement
@@ -41,7 +45,15 @@ public class AircraftRecyclerAdapter extends RecyclerView.Adapter<AircraftRecycl
         View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.aircraft_list_item, viewGroup, false);
         v.setOnClickListener(view -> {
             int pos = ((RecyclerView)viewGroup).getChildAdapterPosition(view);
-            Snackbar.make(view, mAircraftStrings[pos], Snackbar.LENGTH_LONG).show();
+            if (mAircraftStrings[pos].equals("N734BG")) {
+                Bundle bundle = new Bundle();
+                bundle.putString("tailNumber", mAircraftStrings[pos]);
+                Navigation.findNavController(v).navigate(R.id.nav_chart, bundle);
+            }
+            else
+            {
+                Snackbar.make(view, mAircraftStrings[pos], Snackbar.LENGTH_LONG).show();
+            }
         });
         ViewHolder vh = new ViewHolder(v);
         TextView t = vh.getTextView();
